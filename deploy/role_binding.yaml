@@ -1,0 +1,11 @@
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: ordered-chaos-monkey-operator
+subjects:
+- kind: ServiceAccount
+  name: ordered-chaos-monkey-operator
+roleRef:
+  kind: Role
+  name: ordered-chaos-monkey-operator
+  apiGroup: rbac.authorization.k8s.io
