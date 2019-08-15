@@ -1,0 +1,7 @@
+apiVersion: chaos.wessner.me/v1alpha1
+kind: ChaosPod
+metadata:
+  name: example-chaospod
+spec:
+  # Add fields here
+  size: 3
