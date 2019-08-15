@@ -3,6 +3,8 @@ package chaospod
 import (
 	"context"
 
+	"strings"
+
 	chaosv1alpha1 "github.com/wtfjoke/ordered-chaos-monkey-operator/pkg/apis/chaos/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -98,6 +100,29 @@ func (r *ReconcileChaosPod) Reconcile(request reconcile.Request) (reconcile.Resu
 		}
 		// Error reading the object - requeue the request.
 		return reconcile.Result{}, err
+	}
+
+	podListFound := &corev1.PodList{}
+	lo := client.InNamespace(request.Namespace)
+	// la := client.ListOptions{
+	// 	LabelSelector: labels.SelectorFromSet(map[string]string{"name": instance.Spec.PrefixToKill}).String(),
+	// }
+	err = r.client.List(context.TODO(), lo, podListFound)
+	if err != nil {
+		reqLogger.Error(err, "Havent found any pods in "+request.Namespace)
+		return reconcile.Result{}, err
+	}
+
+	for _, pod := range podListFound.Items {
+		if strings.HasPrefix(pod.Name, instance.Spec.PrefixToKill) {
+			reqLogger.Info("🎉 Yay! Found pod to kill!", "Pod.Namespace", pod.Namespace, "Pod.Name", pod.Name)
+			err = r.client.Delete(context.TODO(), &pod)
+			if err != nil {
+				reqLogger.Error(err, "💥 Problem while killing/deleting pod "+pod.Name)
+			} else {
+				reqLogger.Info("💀 Killed/Deleted pod!", "Pod.Namespace", pod.Namespace, "Pod.Name", pod.Name)
+			}
+		}
 	}
 
 	// Define a new Pod object
