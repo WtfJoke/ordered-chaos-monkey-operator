@@ -2,6 +2,7 @@ package chaospod
 
 import (
 	"context"
+	"reflect"
 
 	"strings"
 
@@ -113,15 +114,28 @@ func (r *ReconcileChaosPod) Reconcile(request reconcile.Request) (reconcile.Resu
 		return reconcile.Result{}, err
 	}
 
+	var killedPodNames []string
 	for _, pod := range podListFound.Items {
 		if strings.HasPrefix(pod.Name, instance.Spec.PrefixToKill) {
+			podName := pod.Name
 			reqLogger.Info("🎉 Yay! Found pod to kill!", "Pod.Namespace", pod.Namespace, "Pod.Name", pod.Name)
 			err = r.client.Delete(context.TODO(), &pod)
 			if err != nil {
 				reqLogger.Error(err, "💥 Problem while killing/deleting pod "+pod.Name)
 			} else {
+				killedPodNames = append(killedPodNames, podName)
 				reqLogger.Info("💀 Killed/Deleted pod!", "Pod.Namespace", pod.Namespace, "Pod.Name", pod.Name)
 			}
+		}
+	}
+
+	// Update the chaospod status with the killed pod names if needed
+	if !reflect.DeepEqual(killedPodNames, instance.Status.Nodes) {
+		instance.Status.Nodes = killedPodNames
+		err := r.client.Status().Update(context.TODO(), instance)
+		if err != nil {
+			reqLogger.Error(err, "Failed to update chaospod status")
+			return reconcile.Result{}, err
 		}
 	}
 
