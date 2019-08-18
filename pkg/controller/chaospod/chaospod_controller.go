@@ -103,6 +103,13 @@ func (r *ReconcileChaosPod) Reconcile(request reconcile.Request) (reconcile.Resu
 		return reconcile.Result{}, err
 	}
 
+	prefixToKill := instance.Spec.PrefixToKill
+	if len(prefixToKill) == 0 {
+		reqLogger.Info("No prefix to kill defined in chaospod " + instance.Name + " do nothing")
+		// As long prefix is empty, do not requeue
+		return reconcile.Result{}, nil
+	}
+
 	podListFound := &corev1.PodList{}
 	lo := client.InNamespace(request.Namespace)
 	// la := client.ListOptions{
@@ -115,8 +122,10 @@ func (r *ReconcileChaosPod) Reconcile(request reconcile.Request) (reconcile.Resu
 	}
 
 	var killedPodNames []string
+
+	reqLogger.Info("Searching for pods with prefix " + prefixToKill)
 	for _, pod := range podListFound.Items {
-		if strings.HasPrefix(pod.Name, instance.Spec.PrefixToKill) {
+		if strings.HasPrefix(pod.Name, prefixToKill) {
 			podName := pod.Name
 			reqLogger.Info("🎉 Yay! Found pod to kill!", "Pod.Namespace", pod.Namespace, "Pod.Name", pod.Name)
 			err = r.client.Delete(context.TODO(), &pod)
