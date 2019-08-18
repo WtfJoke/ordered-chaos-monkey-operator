@@ -4,4 +4,4 @@ metadata:
   name: example-chaospod
 spec:
   # Add fields here
-  size: 3
+  prefixtokill: tokill
