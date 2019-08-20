@@ -127,6 +127,12 @@ func (r *ReconcileChaosPod) Reconcile(request reconcile.Request) (reconcile.Resu
 	for _, pod := range podListFound.Items {
 		if strings.HasPrefix(pod.Name, prefixToKill) {
 			podName := pod.Name
+			podUID := string(pod.UID)
+			alreadyKilledPods := instance.Status.KilledPodNames
+			if _, ok := alreadyKilledPods[podUID]; ok {
+				reqLogger.Info("😥 Attempted to kill pod '" + podName + "' but it is already marked as killed, assume its beeing killed/terminated")
+				continue
+			}
 			reqLogger.Info("🎉 Yay! Found pod to kill!", "Pod.Namespace", pod.Namespace, "Pod.Name", podName)
 			err = r.client.Delete(context.TODO(), &pod)
 			if err != nil {
@@ -136,7 +142,7 @@ func (r *ReconcileChaosPod) Reconcile(request reconcile.Request) (reconcile.Resu
 					reqLogger.Error(err, "💥 Problem while killing/deleting pod '"+podName+"'")
 				}
 			} else {
-				killedPodNames[string(pod.UID)] = podName
+				killedPodNames[podUID] = podName
 				reqLogger.Info("💀 Killed/Deleted pod!", "Pod.Namespace", pod.Namespace, "Pod.Name", podName)
 			}
 		}
