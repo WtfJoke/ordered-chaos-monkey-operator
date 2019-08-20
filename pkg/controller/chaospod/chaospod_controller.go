@@ -112,11 +112,7 @@ func (r *ReconcileChaosPod) Reconcile(request reconcile.Request) (reconcile.Resu
 	}
 
 	podListFound := &corev1.PodList{}
-	lo := client.InNamespace(request.Namespace)
-	// la := client.ListOptions{
-	// 	LabelSelector: labels.SelectorFromSet(map[string]string{"name": instance.Spec.PrefixToKill}).String(),
-	// }
-	err = r.client.List(context.TODO(), lo, podListFound)
+	err = r.client.List(context.TODO(), client.InNamespace(request.Namespace), podListFound)
 	if err != nil {
 		reqLogger.Error(err, "Havent found any pods in "+request.Namespace)
 		return reconcile.Result{}, err
