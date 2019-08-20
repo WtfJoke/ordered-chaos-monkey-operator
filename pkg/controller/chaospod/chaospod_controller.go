@@ -6,6 +6,7 @@ import (
 
 	"strings"
 
+	"github.com/go-logr/logr"
 	chaosv1alpha1 "github.com/wtfjoke/ordered-chaos-monkey-operator/pkg/apis/chaos/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -136,11 +137,7 @@ func (r *ReconcileChaosPod) Reconcile(request reconcile.Request) (reconcile.Resu
 			reqLogger.Info("🎉 Yay! Found pod to kill!", "Pod.Namespace", pod.Namespace, "Pod.Name", podName)
 			err = r.client.Delete(context.TODO(), &pod)
 			if err != nil {
-				if errors.IsNotFound(err) {
-					reqLogger.Info("🤷 Pod '" + podName + "' not found for deletion/killing, assume is already beeing killed")
-				} else {
-					reqLogger.Error(err, "💥 Problem while killing/deleting pod '"+podName+"'")
-				}
+				logDeletePodError(reqLogger, err, podName)
 			} else {
 				killedPodNames[podUID] = podName
 				reqLogger.Info("💀 Killed/Deleted pod!", "Pod.Namespace", pod.Namespace, "Pod.Name", podName)
@@ -214,5 +211,13 @@ func newPodForCR(cr *chaosv1alpha1.ChaosPod) *corev1.Pod {
 				},
 			},
 		},
+	}
+}
+
+func logDeletePodError(reqLogger logr.Logger, err error, podName string) {
+	if errors.IsNotFound(err) {
+		reqLogger.Info("🤷 Pod '" + podName + "' not found for deletion/killing, assume is already beeing killed")
+	} else {
+		reqLogger.Error(err, "💥 Problem while killing/deleting pod '"+podName+"'")
 	}
 }
