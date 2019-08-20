@@ -15,9 +15,11 @@ docker push dxjoke/ordered-chaos-monkey-operator:v0.0.1
 `export OPERATOR_NAME=ordered-chaos-monkey-operator`
 
 Without debugging:
+
 `operator-sdk up local --namespace=default`
 
 With debugging:
+
 `operator-sdk up local --namespace=default --enable-delve`
 
 
@@ -36,14 +38,13 @@ First lets create a to killable pod using:
 
 `kubectl apply -f somepod/somepod.yml`
 
-Note: The name of the pod starts with "tokill".
+Create the chaos pod (which should kill the pod of `somepod.yml`) using:
 
-Then create the chaos pod using:
 `kubectl apply -f deploy/crds/chaos_v1alpha1_chaospod_cr.yaml`
 
-Note: The prefixToKill is "toKilL".
 
 Inspect chaospod:
 `kubectl describe chaospod`
-You will see in Status/Nodes a list of killed notes (in our case "tokilltwocontainerspod")
-Somepod will not be running anymore.
+You will see in Status/Killedpodnames a list of killed pod names (in our case "tokilltwocontainerspod"). 
+
+Pod tokilltwocontainerspod shouldnt be running anymore as well.
