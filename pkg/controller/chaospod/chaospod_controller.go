@@ -145,9 +145,9 @@ func (r *ReconcileChaosPod) Reconcile(request reconcile.Request) (reconcile.Resu
 	// Update the chaospod status with the killed pod names if needed
 	if len(killedPodNames) > 0 {
 		// append existing killed pod names to new killed pod names
-		killedPodNames := append(instance.Status.Nodes, killedPodNames...)
-		if !reflect.DeepEqual(killedPodNames, instance.Status.Nodes) {
-			instance.Status.Nodes = killedPodNames
+		killedPodNames := append(instance.Status.KilledPodNames, killedPodNames...)
+		if !reflect.DeepEqual(killedPodNames, instance.Status.KilledPodNames) {
+			instance.Status.KilledPodNames = killedPodNames
 			err := r.client.Status().Update(context.TODO(), instance)
 			if err != nil {
 				reqLogger.Error(err, "Failed to update chaospod status")
