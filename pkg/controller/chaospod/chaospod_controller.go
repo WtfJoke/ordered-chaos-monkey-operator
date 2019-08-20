@@ -130,7 +130,11 @@ func (r *ReconcileChaosPod) Reconcile(request reconcile.Request) (reconcile.Resu
 			reqLogger.Info("🎉 Yay! Found pod to kill!", "Pod.Namespace", pod.Namespace, "Pod.Name", pod.Name)
 			err = r.client.Delete(context.TODO(), &pod)
 			if err != nil {
-				reqLogger.Error(err, "💥 Problem while killing/deleting pod "+pod.Name)
+				if errors.IsNotFound(err) {
+					reqLogger.Info("🤷 Pod '" + pod.Name + "' not found for deletion/killing, assume is already beeing killed")
+				} else {
+					reqLogger.Error(err, "💥 Problem while killing/deleting pod '"+pod.Name+"'")
+				}
 			} else {
 				killedPodNames = append(killedPodNames, podName)
 				reqLogger.Info("💀 Killed/Deleted pod!", "Pod.Namespace", pod.Namespace, "Pod.Name", pod.Name)
