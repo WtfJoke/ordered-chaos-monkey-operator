@@ -131,7 +131,7 @@ func (r *ReconcileChaosPod) Reconcile(request reconcile.Request) (reconcile.Resu
 			podUID := string(pod.UID)
 			alreadyKilledPods := instance.Status.KilledPodNames
 			if _, ok := alreadyKilledPods[podUID]; ok {
-				reqLogger.Info("😥 Attempted to kill pod '" + podName + "' but it is already marked as killed, assume its beeing killed/terminated")
+				reqLogger.Info("😥 Attempted to kill previously killed pod, assume its beeing terminated.", "Pod.Namespace", pod.Namespace, "Pod.Name", podName)
 				continue
 			}
 			reqLogger.Info("🎉 Yay! Found pod to kill!", "Pod.Namespace", pod.Namespace, "Pod.Name", podName)
