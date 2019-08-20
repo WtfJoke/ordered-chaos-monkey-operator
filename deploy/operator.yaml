@@ -16,7 +16,7 @@ spec:
       containers:
         - name: ordered-chaos-monkey-operator
           # Replace this with the built image name
-          image: dxjoke/ordered-chaos-monkey-operator:v0.0.2
+          image: dxjoke/ordered-chaos-monkey-operator:v0.0.3
           command:
           - ordered-chaos-monkey-operator
           imagePullPolicy: Always
