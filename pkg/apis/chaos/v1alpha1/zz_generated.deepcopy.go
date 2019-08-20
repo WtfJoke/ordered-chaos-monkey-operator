@@ -90,8 +90,10 @@ func (in *ChaosPodStatus) DeepCopyInto(out *ChaosPodStatus) {
 	*out = *in
 	if in.KilledPodNames != nil {
 		in, out := &in.KilledPodNames, &out.KilledPodNames
-		*out = make([]string, len(*in))
-		copy(*out, *in)
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
 	}
 	return
 }

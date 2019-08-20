@@ -19,7 +19,7 @@ type ChaosPodSpec struct {
 // ChaosPodStatus defines the observed state of ChaosPod
 // +k8s:openapi-gen=true
 type ChaosPodStatus struct {
-	KilledPodNames []string `json:"killedpodnames"`
+	KilledPodNames map[string]string `json:"killedpodnames"`
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
 	// Add custom validation using kubebuilder tags: https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html

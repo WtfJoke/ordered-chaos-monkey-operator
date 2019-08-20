@@ -121,23 +121,23 @@ func (r *ReconcileChaosPod) Reconcile(request reconcile.Request) (reconcile.Resu
 		return reconcile.Result{}, err
 	}
 
-	var killedPodNames []string
+	var killedPodNames = make(map[string]string, len(podListFound.Items))
 
 	reqLogger.Info("Searching for pods with prefix " + prefixToKill)
 	for _, pod := range podListFound.Items {
 		if strings.HasPrefix(pod.Name, prefixToKill) {
 			podName := pod.Name
-			reqLogger.Info("🎉 Yay! Found pod to kill!", "Pod.Namespace", pod.Namespace, "Pod.Name", pod.Name)
+			reqLogger.Info("🎉 Yay! Found pod to kill!", "Pod.Namespace", pod.Namespace, "Pod.Name", podName)
 			err = r.client.Delete(context.TODO(), &pod)
 			if err != nil {
 				if errors.IsNotFound(err) {
-					reqLogger.Info("🤷 Pod '" + pod.Name + "' not found for deletion/killing, assume is already beeing killed")
+					reqLogger.Info("🤷 Pod '" + podName + "' not found for deletion/killing, assume is already beeing killed")
 				} else {
-					reqLogger.Error(err, "💥 Problem while killing/deleting pod '"+pod.Name+"'")
+					reqLogger.Error(err, "💥 Problem while killing/deleting pod '"+podName+"'")
 				}
 			} else {
-				killedPodNames = append(killedPodNames, podName)
-				reqLogger.Info("💀 Killed/Deleted pod!", "Pod.Namespace", pod.Namespace, "Pod.Name", pod.Name)
+				killedPodNames[string(pod.UID)] = podName
+				reqLogger.Info("💀 Killed/Deleted pod!", "Pod.Namespace", pod.Namespace, "Pod.Name", podName)
 			}
 		}
 	}
@@ -145,7 +145,9 @@ func (r *ReconcileChaosPod) Reconcile(request reconcile.Request) (reconcile.Resu
 	// Update the chaospod status with the killed pod names if needed
 	if len(killedPodNames) > 0 {
 		// append existing killed pod names to new killed pod names
-		killedPodNames := append(instance.Status.KilledPodNames, killedPodNames...)
+		for k, v := range instance.Status.KilledPodNames {
+			killedPodNames[k] = v
+		}
 		if !reflect.DeepEqual(killedPodNames, instance.Status.KilledPodNames) {
 			instance.Status.KilledPodNames = killedPodNames
 			err := r.client.Status().Update(context.TODO(), instance)
