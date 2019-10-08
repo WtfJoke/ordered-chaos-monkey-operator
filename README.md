@@ -36,7 +36,7 @@ kubectl create -f deploy/operator.yaml
 ### Test/Create chaos pod
 First lets create a to killable pod using:
 
-`kubectl apply -f somepod/somepod.yml`
+`kubectl apply -f samplepod/somepod.yml`
 
 Create the chaos pod (which should kill the pod of `somepod.yml`) using:
 
