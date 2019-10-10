@@ -2,7 +2,6 @@ package chaospod
 
 import (
 	"context"
-	"reflect"
 
 	"strings"
 
@@ -65,6 +64,13 @@ type ReconcileChaosPod struct {
 	scheme *runtime.Scheme
 }
 
+// PodDeletionResult object identifiyng a just deleted pod
+type PodDeletionResult struct {
+	podUID            string
+	podName           string
+	deletionSucessful bool
+}
+
 // Reconcile reads that state of the cluster for a ChaosPod object and makes changes based on the state read
 // and what is in the ChaosPod.Spec
 // Note:
@@ -101,21 +107,23 @@ func (r *ReconcileChaosPod) Reconcile(request reconcile.Request) (reconcile.Resu
 		return reconcile.Result{}, err
 	}
 
-	var killedPodNames = killPods(r, instance, podListFound.Items, reqLogger)
+	var killedPodResult = killPod(r, instance, podListFound.Items, reqLogger)
 
 	// Update the chaospod status with the killed pod names if needed
-	if len(killedPodNames) > 0 {
-		// append existing killed pod names to new killed pod names
-		for k, v := range instance.Status.KilledPodNames {
-			killedPodNames[k] = v
+	if killedPodResult.deletionSucessful {
+		if instance.Status.KilledPodNames == nil {
+			instance.Status.KilledPodNames = make(map[string]string, len(podListFound.Items))
 		}
-		if !reflect.DeepEqual(killedPodNames, instance.Status.KilledPodNames) {
-			instance.Status.KilledPodNames = killedPodNames
+		if _, ok := instance.Status.KilledPodNames[killedPodResult.podUID]; !ok {
+			instance.Status.KilledPodNames[killedPodResult.podUID] = killedPodResult.podName
 			err := r.client.Status().Update(context.TODO(), instance)
 			if err != nil {
 				reqLogger.Error(err, "Failed to update chaospod status")
 				return reconcile.Result{}, err
 			}
+
+			// requeue to check for other pods to terminate
+			return reconcile.Result{Requeue: true}, nil
 		}
 	}
 
@@ -123,8 +131,8 @@ func (r *ReconcileChaosPod) Reconcile(request reconcile.Request) (reconcile.Resu
 	return reconcile.Result{}, nil
 }
 
-func killPods(r *ReconcileChaosPod, chaosPod *chaosv1alpha1.ChaosPod, existingPods []corev1.Pod, reqLogger logr.Logger) map[string]string {
-	var killedPodNames = make(map[string]string, len(existingPods))
+func killPod(r *ReconcileChaosPod, chaosPod *chaosv1alpha1.ChaosPod, existingPods []corev1.Pod, reqLogger logr.Logger) PodDeletionResult {
+	killedPodResult := PodDeletionResult{deletionSucessful: false}
 	prefixToKill := chaosPod.Spec.PrefixToKill
 
 	reqLogger.Info("Searching for pods with prefix " + prefixToKill)
@@ -139,12 +147,15 @@ func killPods(r *ReconcileChaosPod, chaosPod *chaosv1alpha1.ChaosPod, existingPo
 			if err != nil {
 				logDeletePodError(reqLogger, err, podName)
 			} else {
-				killedPodNames[string(pod.UID)] = podName
+				killedPodResult.podName = podName
+				killedPodResult.podUID = string(pod.UID)
+				killedPodResult.deletionSucessful = true
 				reqLogger.Info("💀 Killed pod!", "Pod.Namespace", pod.Namespace, "Pod.Name", podName)
 			}
+			break // just delete one pod at a time
 		}
 	}
-	return killedPodNames
+	return killedPodResult
 }
 
 func logDeletePodError(reqLogger logr.Logger, err error, podName string) {
