@@ -69,6 +69,8 @@ type PodDeletionResult struct {
 	podUID            string
 	podName           string
 	deletionSucessful bool
+	reconcile         bool
+	err               error
 }
 
 // Reconcile reads that state of the cluster for a ChaosPod object and makes changes based on the state read
@@ -125,6 +127,9 @@ func (r *ReconcileChaosPod) Reconcile(request reconcile.Request) (reconcile.Resu
 			// requeue to check for other pods to terminate
 			return reconcile.Result{Requeue: true}, nil
 		}
+	} else if killedPodResult.reconcile {
+		// deletion failed, requeue and include error
+		return reconcile.Result{Requeue: true}, killedPodResult.err
 	}
 
 	reqLogger.Info("Skip reconcile")
@@ -132,12 +137,12 @@ func (r *ReconcileChaosPod) Reconcile(request reconcile.Request) (reconcile.Resu
 }
 
 func killPod(r *ReconcileChaosPod, chaosPod *chaosv1alpha1.ChaosPod, existingPods []corev1.Pod, reqLogger logr.Logger) PodDeletionResult {
-	killedPodResult := PodDeletionResult{deletionSucessful: false}
+	killedPodResult := PodDeletionResult{deletionSucessful: false, reconcile: false}
 	prefixToKill := chaosPod.Spec.PrefixToKill
 
 	reqLogger.Info("Searching for pods with prefix " + prefixToKill)
 	for _, pod := range existingPods {
-		isAlreadyBeeingTerminated := pod.GetDeletionTimestamp() != nil
+		isAlreadyBeeingTerminated := pod.DeletionTimestamp != nil
 		if strings.HasPrefix(pod.Name, prefixToKill) && !isAlreadyBeeingTerminated {
 			podName := pod.Name
 
@@ -146,6 +151,8 @@ func killPod(r *ReconcileChaosPod, chaosPod *chaosv1alpha1.ChaosPod, existingPod
 
 			if err != nil {
 				logDeletePodError(reqLogger, err, podName)
+				killedPodResult.reconcile = true
+				killedPodResult.err = err
 			} else {
 				killedPodResult.podName = podName
 				killedPodResult.podUID = string(pod.UID)
