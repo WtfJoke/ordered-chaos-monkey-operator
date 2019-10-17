@@ -1,5 +1,5 @@
 # Ordered Chaos Monkey Operator
-This k8 operator is created for demonstrating purpose using the [operator-sdk](https://github.com/operator-framework/operator-sdk). 
+This k8 operator is created for demonstrating purpose using the [operator-sdk](https://github.com/operator-framework/operator-sdk) in `v0.11.0`. 
 It introduces a new Custom Ressource (Definition) "ChaosPod". 
 You can define a prefix (prefixtokill) for to be killed pods.
 As soon as you create/apply a chaos pod, it kills all pods with said prefix.

@@ -11,9 +11,9 @@ import (
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
-		"github.com/wtfjoke/ordered-chaos-monkey-operator/pkg/apis/chaos/v1alpha1.ChaosPod":       schema_pkg_apis_chaos_v1alpha1_ChaosPod(ref),
-		"github.com/wtfjoke/ordered-chaos-monkey-operator/pkg/apis/chaos/v1alpha1.ChaosPodSpec":   schema_pkg_apis_chaos_v1alpha1_ChaosPodSpec(ref),
-		"github.com/wtfjoke/ordered-chaos-monkey-operator/pkg/apis/chaos/v1alpha1.ChaosPodStatus": schema_pkg_apis_chaos_v1alpha1_ChaosPodStatus(ref),
+		"./pkg/apis/chaos/v1alpha1.ChaosPod":       schema_pkg_apis_chaos_v1alpha1_ChaosPod(ref),
+		"./pkg/apis/chaos/v1alpha1.ChaosPodSpec":   schema_pkg_apis_chaos_v1alpha1_ChaosPodSpec(ref),
+		"./pkg/apis/chaos/v1alpha1.ChaosPodStatus": schema_pkg_apis_chaos_v1alpha1_ChaosPodStatus(ref),
 	}
 }
 
@@ -22,6 +22,7 @@ func schema_pkg_apis_chaos_v1alpha1_ChaosPod(ref common.ReferenceCallback) commo
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
 				Description: "ChaosPod is the Schema for the chaospods API",
+				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"kind": {
 						SchemaProps: spec.SchemaProps{
@@ -44,19 +45,19 @@ func schema_pkg_apis_chaos_v1alpha1_ChaosPod(ref common.ReferenceCallback) commo
 					},
 					"spec": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/wtfjoke/ordered-chaos-monkey-operator/pkg/apis/chaos/v1alpha1.ChaosPodSpec"),
+							Ref: ref("./pkg/apis/chaos/v1alpha1.ChaosPodSpec"),
 						},
 					},
 					"status": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/wtfjoke/ordered-chaos-monkey-operator/pkg/apis/chaos/v1alpha1.ChaosPodStatus"),
+							Ref: ref("./pkg/apis/chaos/v1alpha1.ChaosPodStatus"),
 						},
 					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/wtfjoke/ordered-chaos-monkey-operator/pkg/apis/chaos/v1alpha1.ChaosPodSpec", "github.com/wtfjoke/ordered-chaos-monkey-operator/pkg/apis/chaos/v1alpha1.ChaosPodStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
+			"./pkg/apis/chaos/v1alpha1.ChaosPodSpec", "./pkg/apis/chaos/v1alpha1.ChaosPodStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
 	}
 }
 
@@ -65,10 +66,18 @@ func schema_pkg_apis_chaos_v1alpha1_ChaosPodSpec(ref common.ReferenceCallback) c
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
 				Description: "ChaosPodSpec defines the desired state of ChaosPod",
-				Properties:  map[string]spec.Schema{},
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"prefixtokill": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+				},
+				Required: []string{"prefixtokill"},
 			},
 		},
-		Dependencies: []string{},
 	}
 }
 
@@ -77,9 +86,25 @@ func schema_pkg_apis_chaos_v1alpha1_ChaosPodStatus(ref common.ReferenceCallback)
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
 				Description: "ChaosPodStatus defines the observed state of ChaosPod",
-				Properties:  map[string]spec.Schema{},
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"killedpodnames": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"killedpodnames"},
 			},
 		},
-		Dependencies: []string{},
 	}
 }

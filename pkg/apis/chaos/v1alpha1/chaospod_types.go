@@ -30,6 +30,7 @@ type ChaosPodStatus struct {
 // ChaosPod is the Schema for the chaospods API
 // +k8s:openapi-gen=true
 // +kubebuilder:subresource:status
+// +kubebuilder:resource:path=chaospods,scope=Namespaced
 type ChaosPod struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

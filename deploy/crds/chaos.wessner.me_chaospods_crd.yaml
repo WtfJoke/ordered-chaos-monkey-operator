@@ -14,6 +14,7 @@ spec:
     status: {}
   validation:
     openAPIV3Schema:
+      description: ChaosPod is the Schema for the chaospods API
       properties:
         apiVersion:
           description: 'APIVersion defines the versioned schema of this representation
@@ -28,9 +29,24 @@ spec:
         metadata:
           type: object
         spec:
+          description: ChaosPodSpec defines the desired state of ChaosPod
+          properties:
+            prefixtokill:
+              type: string
+          required:
+          - prefixtokill
           type: object
         status:
+          description: ChaosPodStatus defines the observed state of ChaosPod
+          properties:
+            killedpodnames:
+              additionalProperties:
+                type: string
+              type: object
+          required:
+          - killedpodnames
           type: object
+      type: object
   version: v1alpha1
   versions:
   - name: v1alpha1
