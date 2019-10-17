@@ -134,7 +134,7 @@ func (r *ReconcileChaosPod) Reconcile(request reconcile.Request) (reconcile.Resu
 	}
 
 	requeueEverySeconds := requeueAfterSeconds(instance.Spec.CheckEverySecond)
-	reqLogger.Info(fmt.Sprintf("⏳ Nothing to do - reconcile in %f s", requeueEverySeconds.Seconds()))
+	reqLogger.Info(fmt.Sprintf("⏳ Nothing to do - reconcile in %ds", int(requeueEverySeconds.Seconds())))
 	return reconcile.Result{RequeueAfter: requeueEverySeconds}, nil
 }
 
