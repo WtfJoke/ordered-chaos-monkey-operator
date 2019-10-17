@@ -31,20 +31,20 @@ spec:
         spec:
           description: ChaosPodSpec defines the desired state of ChaosPod
           properties:
-            prefixtokill:
+            prefixToKill:
               type: string
           required:
-          - prefixtokill
+          - prefixToKill
           type: object
         status:
           description: ChaosPodStatus defines the observed state of ChaosPod
           properties:
-            killedpodnames:
+            killedPodNames:
               additionalProperties:
                 type: string
               type: object
           required:
-          - killedpodnames
+          - killedPodNames
           type: object
       type: object
   version: v1alpha1

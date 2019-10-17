@@ -68,14 +68,14 @@ func schema_pkg_apis_chaos_v1alpha1_ChaosPodSpec(ref common.ReferenceCallback) c
 				Description: "ChaosPodSpec defines the desired state of ChaosPod",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"prefixtokill": {
+					"prefixToKill": {
 						SchemaProps: spec.SchemaProps{
 							Type:   []string{"string"},
 							Format: "",
 						},
 					},
 				},
-				Required: []string{"prefixtokill"},
+				Required: []string{"prefixToKill"},
 			},
 		},
 	}
@@ -88,7 +88,7 @@ func schema_pkg_apis_chaos_v1alpha1_ChaosPodStatus(ref common.ReferenceCallback)
 				Description: "ChaosPodStatus defines the observed state of ChaosPod",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"killedpodnames": {
+					"killedPodNames": {
 						SchemaProps: spec.SchemaProps{
 							Type: []string{"object"},
 							AdditionalProperties: &spec.SchemaOrBool{
@@ -103,7 +103,7 @@ func schema_pkg_apis_chaos_v1alpha1_ChaosPodStatus(ref common.ReferenceCallback)
 						},
 					},
 				},
-				Required: []string{"killedpodnames"},
+				Required: []string{"killedPodNames"},
 			},
 		},
 	}

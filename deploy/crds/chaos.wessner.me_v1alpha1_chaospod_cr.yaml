@@ -3,4 +3,4 @@ kind: ChaosPod
 metadata:
   name: example-chaospod
 spec:
-  prefixtokill: tokill
+  prefixToKill: tokill
