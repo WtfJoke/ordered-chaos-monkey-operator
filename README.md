@@ -55,6 +55,7 @@ Create the chaos pod (which should kill the pod of `somepod.yml`) using:
 
 
 Inspect chaospod:
+
 `kubectl get chaospod example-chaospod -o yaml`
 
 ```yaml
@@ -67,7 +68,7 @@ status:
 
 You will see a list of killed pod names (in our case "tokilltwocontainerspod"). 
 
-Pod tokilltwocontainerspod shouldnt be running anymore as well.
+Pod `tokilltwocontainerspod` shouldnt be running anymore as well.
 
 
 
