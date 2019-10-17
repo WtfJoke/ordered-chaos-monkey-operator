@@ -74,6 +74,12 @@ func schema_pkg_apis_chaos_v1alpha1_ChaosPodSpec(ref common.ReferenceCallback) c
 							Format: "",
 						},
 					},
+					"checkEverySecond": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"integer"},
+							Format: "int32",
+						},
+					},
 				},
 				Required: []string{"prefixToKill"},
 			},

@@ -31,6 +31,8 @@ spec:
         spec:
           description: ChaosPodSpec defines the desired state of ChaosPod
           properties:
+            checkEverySecond:
+              type: integer
             prefixToKill:
               type: string
           required:

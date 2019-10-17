@@ -10,7 +10,8 @@ import (
 // ChaosPodSpec defines the desired state of ChaosPod
 // +k8s:openapi-gen=true
 type ChaosPodSpec struct {
-	PrefixToKill string `json:"prefixToKill"`
+	PrefixToKill     string `json:"prefixToKill"`
+	CheckEverySecond int    `json:"checkEverySecond,omitempty"`
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
 	// Add custom validation using kubebuilder tags: https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html

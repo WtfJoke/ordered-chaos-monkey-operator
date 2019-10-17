@@ -2,8 +2,9 @@ package chaospod
 
 import (
 	"context"
-
+	"fmt"
 	"strings"
+	"time"
 
 	"github.com/go-logr/logr"
 	chaosv1alpha1 "github.com/wtfjoke/ordered-chaos-monkey-operator/pkg/apis/chaos/v1alpha1"
@@ -132,8 +133,9 @@ func (r *ReconcileChaosPod) Reconcile(request reconcile.Request) (reconcile.Resu
 		return reconcile.Result{Requeue: true}, killedPodResult.err
 	}
 
-	reqLogger.Info("Skip reconcile")
-	return reconcile.Result{}, nil
+	requeueEverySeconds := requeueAfterSeconds(instance.Spec.CheckEverySecond)
+	reqLogger.Info(fmt.Sprintf("Nothing to do - reconcile in %f s", requeueEverySeconds.Seconds()))
+	return reconcile.Result{RequeueAfter: requeueEverySeconds}, nil
 }
 
 func killPod(r *ReconcileChaosPod, chaosPod *chaosv1alpha1.ChaosPod, existingPods []corev1.Pod, reqLogger logr.Logger) PodDeletionResult {
@@ -171,4 +173,11 @@ func logDeletePodError(reqLogger logr.Logger, err error, podName string) {
 	} else {
 		reqLogger.Error(err, "💥 Problem while killing/deleting pod '"+podName+"'")
 	}
+}
+
+func requeueAfterSeconds(checkEverySecond int) time.Duration {
+	if checkEverySecond == 0 {
+		return 60 * time.Second
+	}
+	return time.Duration(checkEverySecond) * time.Second
 }

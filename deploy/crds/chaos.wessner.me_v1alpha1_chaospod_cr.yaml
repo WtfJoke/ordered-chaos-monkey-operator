@@ -4,3 +4,4 @@ metadata:
   name: example-chaospod
 spec:
   prefixToKill: tokill
+  checkEverySeconds: 60
